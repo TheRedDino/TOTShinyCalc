@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chain Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .calculator {
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+            text-align: center;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h2>Chain Calculator</h2>
+        <label for="chainAmount">Amount of Chain (A2):</label>
+        <input type="number" id="chainAmount" step="0.01" placeholder="Enter chain amount">
+
+        <label for="speciesModifier">Species Modifier (L2):</label>
+        <input type="number" id="speciesModifier" value="1" disabled>
+
+        <button onclick="calculateResult()">Calculate</button>
+
+        <div class="result" id="result">Result: </div>
+    </div>
+
+    <script>
+        function calculateResult() {
+            // Get the input values
+            let A2 = parseFloat(document.getElementById('chainAmount').value) || 0;
+            let L2 = parseFloat(document.getElementById('speciesModifier').value) || 1;
+
+            // Calculate the result using the given formula
+            let result = Math.min((1 - Math.pow(2000 / 2000.02, Math.floor(A2 * L2))) + 0.0005, 0.00390625);
+
+            // Display the result
+            document.getElementById('result').innerText = 'Result: ' + result.toFixed(8);
+        }
+    </script>
+</body>
+</html>
