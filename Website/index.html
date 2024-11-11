@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shiny Odds Calculator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #4a90e2;
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .tab-button {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .tab-button:hover {
+            background-color: #357ab8;
+        }
+        .tab {
+            display: none;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .tab.active {
+            display: block;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result, #baseOddsResult {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e7f3fe;
+            border-left: 6px solid #4a90e2;
+            border-radius: 5px;
+        }
+        p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Shiny Odds Calculator</h1>
+    <div class="tabs">
+        <button class="tab-button" onclick="showTab('oddsCalculator')">Shiny Odds Calculator</button>
+        <button class="tab-button" onclick="showTab('baseOddsCalculator')">Base Odds & Spawn Boost</button>
+    </div>
+
+    <div id="oddsCalculator" class="tab active">
+        <label for="locationSelect">Select Location:</label>
+        <select id="locationSelect" onchange="updateTanorians()">
+            <option value="default">-- Select a Location --</option>
+            <option value="HauntedRealm">Haunted Realm</option>
+            <option value="Route1">Route 1</option>
+            <option value="PreludePlains">Prelude Plains</option>
+            <option value="Arksworth">Arksworth</option>
+            <option value="NatureReserve">Nature Reserve</option>
+            <option value="PonteroPasture">Pontero Pasture</option>
+            <option value="FableFalls">Fable Falls</option>
+            <option value="WhisperingWoods">Whispering Woods</option>
+            <option value="MalachiteMines">Malachite Mines</option>
+            <option value="MalachiteMinesF2">Malachite Mines F2</option>
+            <option value="KaiganCanyon">Kaigan Canyon</option>
+            <option value="Route5">Route 5</option>
+            <option value="DewfallDen">Dewfall Den</option>
+            <option value="KaiganCliffs">Kaigan Cliffs</option>
+            <option value="FlowithersDen">Flowither's Den</option>
+            <option value="AlphaCave1">Alpha Cave 1</option>
+            <option value="AlphaCave2">Alpha Cave 2</option>
+            <option value="AlphaCave3">Alpha Cave 3</option>
+            <option value="AlphaLab">Alpha Lab</option>
+            <option value="Route6">Route 6</option>
+            <option value="MakotoBeach">Makoto Beach</option>
+            <option value="MakotoDive">Makoto Dive</option>
+            <option value="OutsideTheShip">Outside The Ship</option>
+            <option value="Shipwreck">Shipwreck</option>
+            <option value="CoralDive">Coral Dive</option>
+            <option value="DeepDark">Deep Dark</option>
+            
+
+        </select>
+
+        <label for="tanorianSelect">Select Tanorian:</label>
+        <select id="tanorianSelect" onchange="updateInputs()" disabled>
+            <option value="default">-- Select a Tanorian --</option>
+        </select>
+
+        <label for="chainLength">Chain Length:</label>
+        <input type="number" id="chainLength" value="1" min="0" placeholder="Enter chain length"><br>
+
+        <label for="speciesModifier">Species Modifier:</label>
+        <input type="number" id="speciesModifier" value="1" min="1" step="0.1" placeholder="Enter species modifier"><br>
+
+        <label for="baseOddsInput">Custom Base Odds:</label>
+        <input type="number" id="baseOddsInput" value="1" min="1" step="1" placeholder="Enter custom base odds"><br>
+
+        <button onclick="calculateShinyOdds()">Calculate</button>
+
+        <div id="result"></div>
+    </div>
+
+    <div id="baseOddsCalculator" class="tab">
+        <label for ="baseOdds">Base Odds:</label>
+        <input type="number" id="baseOdds" value="50" min="1" step="1" placeholder="Enter base odds"><br>
+
+        <label for="chainNumber">Chain Number:</label>
+        <input type="number" id="chainNumber" value="0" min="0" max="400" placeholder="Enter chain number"><br>
+
+        <button onclick="calculateBaseOdds()">Calculate</button>
+
+        <div id="baseOddsResult"></div>
+    </div>
+
+    <script>
+        const tanoriansByLocation = {
+            Route1: [
+                { name: "Notent", modifier: 1.0, baseOdds: 2.4 },
+                { name: "Calypillar", modifier: 1.0, baseOdds: 2.6 },
+                { name: "Eyaspire", modifier: 1.0, baseOdds: 4.9 }
+            ],
+            PreludePlains: [
+                { name: "Notent", modifier: 1.0, baseOdds: 4 },
+                { name: "Calypillar", modifier: 1.0, baseOdds: 4.5 },
+                { name: "Eyaspire", modifier: 1.0, baseOdds: 4.5 },
+                { name: "Doopy", modifier: 1.0, baseOdds: 5.1 },
+                { name: "Kitweed", modifier: 1.0, baseOdds: 9 }
+            ],
+            Arksworth: [
+                { name: "Notent", modifier: 1.0, baseOdds: 3.7 },
+                { name: "Rootrake", modifier: 1.0, baseOdds: 3.9 },
+                { name: "Maxno", modifier: 1.0, baseOdds: 4.3 },
+                { name: "Purrlazy", modifier: 1.0, baseOdds: 4.5 }
+            ],
+            NatureReserve: [
+                { name: "Rootrake", modifier: 1.0, baseOdds: 4 },
+                { name: "Stagurai", modifier: 1.0, baseOdds: 4.5 },
+                { name: "Bombeetle", modifier: 1.0, baseOdds: 4.5 },
+                { name: "Maxno", modifier: 1.0, baseOdds: 5.1 },
+                { name: "Kitweed", modifier: 1.0, baseOdds: 9 }
+            ],
+            PonteroPasture: [
+                { name: "Citrin-M", modifier: 1.0, baseOdds: 3.6 },
+                { name: "Growhog", modifier: 1.0, baseOdds: 4.4 },
+                { name: "Maxno", modifier: 1.0, baseOdds: 4.4 },
+                { name: "Psycalf", modifier: 1.0, baseOdds: 8.9 },
+                { name: "Radlil", modifier: 1.0, baseOdds: 8.9 },
+                { name: "Chickbin", modifier: 1.0, baseOdds: 23.7 }
+            ],
+            FableFalls: [
+                { name: "Usbee", modifier: 1.0, baseOdds: 2.7 },
+                { name: "Termitate", modifier: 1.0, baseOdds: 3.5 },
+                { name: "Drippo", modifier: 1.0, baseOdds: 3.5 },
+                { name: "Cornica", modifier: 1.0, baseOdds: 17 }
+            ],
+            WhisperingWoods: [
+                { name: "Spooder", modifier: 1.0, baseOdds: 3.8 },
+                { name: "Cheerdeer", modifier: 1.0, baseOdds: 4.3 },
+                { name: "Fliridiant", modifier: 1.0, baseOdds: 4.3 },
+                { name: "Bellbuzz", modifier: 1.0, baseOdds: 4.9 },
+                { name: "Sungadem", modifier: 1.0, baseOdds: 17 }
+            ],
+            MalachiteMines: [
+                { name: "Funglow", modifier: 1.0, baseOdds: 4.3 },
+                { name: "Lumisoar", modifier: 1.0, baseOdds: 4.9 },
+                { name: "Kashroom", modifier: 1.0, baseOdds: 5 },
+                { name: "Moleroup", modifier: 1.0, baseOdds: 8.6 },
+                { name: "Bouldog", modifier: 1.0, baseOdds: 8.6 },
+                { name: "Chromilleon", modifier: 1.0, baseOdds: 11.4 },
+                { name: "Saluminous", modifier: 1.0, baseOdds: 23 }
+            ],
+            MalachiteMinesF2: [
+                { name: "Corrok", modifier: 1.0, baseOdds: 1.9 },
+                { name: "Lilite", modifier: 1.0, baseOdds: 2.2 },
+                { name: "Fordrake", modifier: 1.0, baseOdds: 56 }
+            ],
+            KaiganCanyon: [
+                { name: "Corrok", modifier: 1.0, baseOdds: 2.1 },
+                { name: "Lilite", modifier: 1.0, baseOdds: 2.7 },
+                { name: "Eyaspire", modifier: 1.0, baseOdds: 7.8 },
+                { name: "Hawkadet", modifier: 1.0, baseOdds: 93 }
+            ],
+            Route5: [
+                { name: "Funglow", modifier: 1.0, baseOdds: 3.2 },
+                { name: "Antroop", modifier: 1.0, baseOdds: 3.8 },
+                { name: "Chinciny", modifier: 1.0, baseOdds: 4.8 },
+                { name: "Lilite", modifier: 1.0, baseOdds: 8 }
+            ],
+            DewfallDen: [
+                { name: "Lilite", modifier: 1.0, baseOdds: 2.1 },
+                { name: "Funglow", modifier: 1.0, baseOdds: 2.5 },
+                { name: "Corrok", modifier: 1.0, baseOdds: 8.5 },
+                { name: "Opaline", modifier: 1.0, baseOdds: 63.5 }
+            ],
+            KaiganCliffs: [
+                { name: "Eyaspire", modifier: 1.0, baseOdds: 5.7 },
+                { name: "Maccry", modifier: 1.0, baseOdds: 5.9 },
+                { name: "Snowkit", modifier: 1.0, baseOdds: 6 },
+                { name: "Hawkadet", modifier: 1.0, baseOdds: 6.3 },
+                { name: "Fuzzimp", modifier: 1.0, baseOdds: 6.6 },
+                { name: "Cheeruft", modifier: 1.0, baseOdds: 8.5 },
+                { name: "Purrlazy", modifier: 1.0, baseOdds: 17 }
+            ],
+            FlowithersDen: [
+                { name: "Funglow", modifier: 1.0, baseOdds: 1.7 },
+                { name: "Antroop", modifier: 1.0, baseOdds: 3.2 },
+                { name: "Chinciny", modifier: 1.0, baseOdds: 17.2 },
+                { name: "Lilite", modifier: 1.0, baseOdds: 22.3 }
+            ],
+            AlphaCave1: [
+                { name: "Funglow", modifier: 1.0, baseOdds: 3.2 },
+                { name: "Stalagstone", modifier: 1.0, baseOdds: 5.5 },
+                { name: "Bouldog", modifier: 1.0, baseOdds: 5.5 },
+                { name: "Lilite", modifier: 1.0, baseOdds: 5.5 },
+                { name: "Drakore", modifier: 1.0, baseOdds: 13.7 },
+                { name: "Chromilleon", modifier: 1.0, baseOdds: 27.3 },
+                { name: "Soulemn", modifier: 1.0, baseOdds: 82 }
+            ],
+            AlphaCave2: [
+                { name: "Bouldog", modifier: 1.0, baseOdds: 3.3 },
+                { name: "Lilite", modifier: 1.0, baseOdds: 3.3 },
+                { name: "Funglow", modifier: 1.0, baseOdds: 3.3 },
+                { name: "Koropunk", modifier: 1.0, baseOdds: 28.7 },
+                { name: "Chromilleon", modifier: 1.0, baseOdds: 28.7 },
+                { name: "Soulemn", modifier: 1.0, baseOdds: 86 }
+            ],
+            AlphaCave3: [
+                { name: "Corrok", modifier: 1.0, baseOdds: 3.5 },
+                { name: "Lumisoar", modifier: 1.0, baseOdds: 3.5 },
+                { name: "Funglow", modifier: 1.0, baseOdds: 4.9 },
+                { name: "Kashroom", modifier: 1.0, baseOdds: 7 },
+                { name: "Chromilleon", modifier: 1.0, baseOdds: 21.2 },
+                { name: "Gemistar", modifier: 1.0, baseOdds: 31.8 },
+                { name: "Opaline", modifier: 1.0, baseOdds: 127 }
+            ],
+            AlphaLab: [
+                { name: "Spooder", modifier: 1.0, baseOdds: 5.6 },
+                { name: "Growhog", modifier: 1.0, baseOdds: 5.6 },
+                { name: "Doopy", modifier: 1.0, baseOdds: 7 },
+                { name: "Usbee", modifier: 1.0, baseOdds: 8.2 },
+                { name: "Stagurai", modifier: 1.0, baseOdds: 8.8 },
+                { name: "Marmound", modifier: 1.0, baseOdds: 8.8 },
+                { name: "Bellbuzz", modifier: 1.0, baseOdds: 17.5 },
+                { name: "Chinciny", modifier: 1.0, baseOdds: 17.5 },
+                { name: "Felflora", modifier: 1.0, baseOdds: 35 },
+                { name: "Fordrake", modifier: 1.0, baseOdds: 140}
+            ],
+            Route6: [
+                { name: "Chicrook", modifier: 1.0, baseOdds: 4 },
+                { name: "Maccry", modifier: 1.0, baseOdds: 4.5 },
+                { name: "Doopy", modifier: 1.0, baseOdds: 6 },
+                { name: "Marmound", modifier: 1.0, baseOdds: 6 },
+                { name: "Termitate", modifier: 1.0, baseOdds: 11.1 },
+                { name: "Electricalf", modifier: 1.0, baseOdds: 11.1 },
+                { name: "Cherodoe", modifier: 1.0, baseOdds: 89 }
+            ],
+            MakotoBeach: [
+                { name: "Crustaqua", modifier: 1.0, baseOdds: 3.3 },
+                { name: "Ornitiny", modifier: 1.0, baseOdds: 4.1 },
+                { name: "Chicrook", modifier: 1.0, baseOdds: 4.4 },
+                { name: "Albarrel", modifier: 1.0, baseOdds: 4.9 },
+                { name: "Bubear", modifier: 1.0, baseOdds: 41 }
+            ],
+            MakotoDive: [
+                { name: "Dolfib", modifier: 1.0, baseOdds: 4.3 },
+                { name: "Crustaqua", modifier: 1.0, baseOdds: 4.3 },
+                { name: "Urchee", modifier: 1.0, baseOdds: 4.3 },
+                { name: "Tilew", modifier: 1.0, baseOdds: 9.6 },
+                { name: "Bubboba", modifier: 1.0, baseOdds: 9.6 },
+                { name: "Babite", modifier: 1.0, baseOdds: 12.8 },
+                { name: "Dolphantasy", modifier: 1.0, baseOdds: 77 }     
+            ],
+            OutsideTheShip: [
+                { name: "Crustaqua", modifier: 1.0, baseOdds: 2.9 },
+                { name: "Tilew", modifier: 1.0, baseOdds: 2.9 },
+                { name: "Urchee", modifier: 1.0, baseOdds: 6.6 },
+                { name: "Babite", modifier: 1.0, baseOdds: 6.6 },
+                { name: "Dolphantasy", modifier: 1.0, baseOdds: 53 }
+            ],
+            Shipwreck: [
+                { name: "Dolfib", modifier: 1.0, baseOdds: 2.8 },
+                { name: "Albarrel", modifier: 1.0, baseOdds: 2.8 },
+                { name: "Wispout", modifier: 1.0, baseOdds: 4 },
+                { name: "Lucreep", modifier: 1.0, baseOdds: 24.3 }
+            ],
+            CoralDive: [
+                { name: "Dolfib", modifier: 1.0, baseOdds: 3.8 },
+                { name: "Crustaqua", modifier: 1.0, baseOdds: 3.8 },
+                { name: "Tilew", modifier: 1.0, baseOdds: 3.8 },
+                { name: "Urchee", modifier: 1.0, baseOdds: 8.6 },
+                { name: "Babite", modifier: 1.0, baseOdds: 11.5 },
+                { name: "Dolphantasy", modifier: 1.0, baseOdds: 69 }
+            ],
+            DeepDark: [
+                { name: "Crustaqua", modifier: 1.0, baseOdds: 3 },
+                { name: "Lumeling", modifier: 1.0, baseOdds: 3.8 },
+                { name: "Urchee", modifier: 1.0, baseOdds: 4.1 },
+                { name: "Carpentoy", modifier: 1.0, baseOdds: 9.2 },
+                { name: "Scarasite", modifier: 1.0, baseOdds: 19 }
+            ],
+            HauntedRealm: [
+                { name: "Calypillar", modifier: 1.0, baseOdds: 2.56 },
+                { name: "Wispout", modifier: 1.0, baseOdds: 6.54 },
+                { name: "Rootrake-Nightmare", modifier: 1.0, baseOdds: 8.03 },
+                { name: "Lucreep", modifier: 1.0, baseOdds: 11.16 },
+                { name: "Wickid", modifier: 1.0, baseOdds: 11.85 },
+                { name: "Calytomb", modifier: 1.0, baseOdds: 45.28 },
+                { name: "Cornica", modifier: 1.0, baseOdds: 47.43 },
+                { name: "Sungadem-Nightmare", modifier: 1.0, baseOdds: 47.43 },
+                { name: "Termitate-Nightmare", modifier: 1.0, baseOdds: 63.45 },
+                { name: "Soulemn", modifier: 1.0, baseOdds: 76.05 },
+                { name: "Marbawl", modifier: 1.0, baseOdds: 63.45 },
+                { name: "Astaroid-Nightmare", modifier: 1.0, baseOdds: 118.6 }
+            ],
+        };
+
+        function showTab(tabId) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function updateTanorians() {
+            const locationSelect = document.getElementById('locationSelect');
+            const tanorianSelect = document.getElementById('tanorianSelect');
+            const selectedLocation = locationSelect.value;
+
+            tanorianSelect.innerHTML = '<option value="default">-- Select a Tanorian --</option>';
+            tanorianSelect.disabled = true;
+
+            if (selectedLocation !== 'default') {
+                const tanorians = tanoriansByLocation[selectedLocation];
+                tanorians.forEach(tanorian => {
+                    const option = document.createElement('option');
+                    option.value = tanorian.name.toLowerCase().replace(/\s+/g, '');
+                    option.text = tanorian.name;
+                    option.setAttribute('data-modifier', tanorian.modifier);
+                    option.setAttribute('data-baseOdds', tanorian.baseOdds);
+                    tanorianSelect.appendChild(option);
+                });
+                tanorianSelect.disabled = false;
+            }
+        }
+
+        function updateInputs() {
+            const select = document.getElementById('tanorianSelect');
+            const selectedOption = select.options[select.selectedIndex];
+
+            if (selectedOption.value !== 'default') {
+                const modifier = selectedOption.getAttribute('data-modifier');
+                const baseOdds = selectedOption.getAttribute('data-baseOdds');
+
+                document.getElementById('speciesModifier').value = modifier;
+                document.getElementById('baseOddsInput').value = baseOdds;
+            } else {
+                document.getElementById('speciesModifier').value = 1;
+                document.getElementById('baseOddsInput').value = 50;
+            }
+        }
+
+        function calculateShinyOdds() {
+            const chain = parseFloat(document.getElementById('chainLength').value);
+            const speciesModifier = parseFloat(document.getElementById('speciesModifier').value);
+            const customBaseOdds = parseFloat(document.getElementById('baseOddsInput').value);
+
+            const baseValue = 2000;
+            const shinyCap = 0.00390625;
+            const additionalValue = 0.0005;
+
+            const fraction = baseValue / (baseValue + 0.02);
+
+            const shinyEffectiveness = Math.min(
+                1 - Math.pow(fraction , Math.floor(chain * speciesModifier)) + additionalValue,
+                shinyCap
+            );
+
+            const baseOdds = customBaseOdds / shinyEffectiveness;
+
+            document.getElementById('result').innerHTML = `
+                <h2>Results:</h2>
+                <p>Shiny Effectiveness: ${shinyEffectiveness.toFixed(6)}</p>
+                <p>Base Odds: 1/${Math.round(baseOdds)}</p>
+            `;
+        }
+
+        function calculateBaseOdds() {
+            const baseOdds = parseFloat(document.getElementById('baseOdds').value);
+            const chainNumber = Math.min(parseFloat(document.getElementById('chainNumber').value), 400);
+
+            const spawnBoost = Math.min(chainNumber * 0.05, 20);
+
+            const effectiveOdds = baseOdds * (1 - spawnBoost / 100);
+
+            document.getElementById('baseOddsResult').innerHTML = `
+ <h2>Results:</h2>
+                <p>Base Odds: 1/${Math.round(baseOdds)}</p>
+                <p>Chain Number: ${chainNumber}</p>
+                <p>Spawn Boost %: ${spawnBoost}%</p>
+                <p>Effective Odds with Spawn Boost: 1/${Math.round(effectiveOdds)}</p>
+            `;
+        }
+    </script>
+<p>Made by RedDino</p>
+</body>
+</html>
