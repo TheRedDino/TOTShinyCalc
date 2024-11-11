@@ -95,6 +95,8 @@
         <select id="locationSelect" onchange="updateTanorians()">
             <option value="default">-- Select a Location --</option>
             <option value="HauntedRealm">Haunted Realm</option>
+            <option value="Roamings">Roamings</option>
+            <option value="Weather">Weather</option>
             <option value="Route1">Route 1</option>
             <option value="PreludePlains">Prelude Plains</option>
             <option value="Arksworth">Arksworth</option>
@@ -354,6 +356,16 @@
                 { name: "Soulemn", modifier: 1.0, baseOdds: 76.05 },
                 { name: "Marbawl", modifier: 1.0, baseOdds: 63.45 },
                 { name: "Astaroid-Nightmare", modifier: 1.0, baseOdds: 118.6 }
+            ],
+            Roamings: [
+                { name: "Flowither", modifier: 1.08, baseOdds: 1000 },
+                { name: "Lampyro", modifier: 1.08, baseOdds: 1000 },
+                { name: "Brutree", modifier: 1.08, baseOdds: 1000 }
+            ],
+            Weather: [
+                { name: "Astaroid", modifier: 1.12, baseOdds: 50 },
+                { name: "Climitten", modifier: 1.12, baseOdds: 50 },
+                { name: "Elegelo", modifier: 1.12, baseOdds: 50 }
             ],
         };
 
